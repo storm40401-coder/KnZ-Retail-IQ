@@ -27,8 +27,6 @@ interface Transaction {
 interface FinancialsProps {
   isPro: boolean;
   onUpgrade: () => void;
-  isBankLinked: boolean;
-  onBankLinked: () => void;
 }
 
 const MOCK_TRANSACTIONS: Transaction[] = [
@@ -37,149 +35,8 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '3', type: 'expense', amount: 2000, description: 'KnZ Pro Subscription', category: 'Software', date: '2026-04-28' },
 ];
 
-export default function Financials({ isPro, onUpgrade, isBankLinked, onBankLinked }: FinancialsProps) {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [showIBANForm, setShowIBANForm] = useState(false);
-  const [formData, setFormData] = useState({
-    bankName: 'Meezan Bank',
-    iban: '',
-    accountTitle: ''
-  });
-
-  const handleConnectBank = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsConnecting(true);
-    try {
-      const response = await fetch('/api/verify-local-bank', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        onBankLinked();
-      } else {
-        alert(data.error || "Verification failed");
-      }
-    } catch (error) {
-      console.error("Link Error:", error);
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const bankConnected = isBankLinked;
-
-  if (!bankConnected) {
-    return (
-      <div className="p-8 lg:p-12 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
-        <div className="w-20 h-20 bg-[#FACC15] text-[#141414] rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(250,204,21,0.3)]">
-          <Building2 size={32} />
-        </div>
-        <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">Financial Intelligence</h1>
-        <p className="text-gray-500 mt-4 max-w-md leading-relaxed">
-          Link your Pakistani Business Bank Account to automate payouts and unlock all KnZ Smart Inventory tools.
-        </p>
-
-        {!showIBANForm ? (
-          <>
-            <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-              {[
-                { icon: ShieldCheck, title: "SBP Regulated", desc: "SECURE LOCAL BANK INTEGRATION" },
-                { icon: Wallet, title: "Profit Tracking", desc: "CALCULATE MARGINS IN PKR" },
-                { icon: CreditCard, title: "Instant Payouts", desc: "DIRECT TO 1LINK ACCOUNTS" }
-              ].map((feature, i) => (
-                <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                  <feature.icon size={24} className="text-[#FACC15] mb-3" />
-                  <h4 className="font-bold text-sm text-[#141414]">{feature.title}</h4>
-                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-            <button 
-              onClick={() => setShowIBANForm(true)}
-              className="mt-12 px-10 py-4 bg-[#141414] text-white rounded-2xl font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
-            >
-              <CreditCard size={18} />
-              Setup Local Bank Account
-            </button>
-          </>
-        ) : (
-          <form onSubmit={handleConnectBank} className="mt-10 w-full max-w-md bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl text-left space-y-6">
-            <h3 className="font-bold text-lg text-[#141414] mb-4">Account Details</h3>
-            
-            <div className="space-y-2">
-              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Bank Name</label>
-              <select 
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#FACC15] outline-none"
-                value={formData.bankName}
-                onChange={(e) => setFormData({...formData, bankName: e.target.value})}
-              >
-                <option>HBL</option>
-                <option>Meezan Bank</option>
-                <option>Bank Alfalah</option>
-                <option>UBL</option>
-                <option>SadaBiz / SadaPay</option>
-                <option>NayaPay</option>
-                <option>Standard Chartered</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Account Title</label>
-              <input 
-                type="text"
-                placeholder="Full Name as per CNIC/Bank"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#FACC15] outline-none"
-                required
-                value={formData.accountTitle}
-                onChange={(e) => setFormData({...formData, accountTitle: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">IBAN (24 Characters)</label>
-              <input 
-                type="text"
-                placeholder="PK00XXXX0000000000000000"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium font-mono focus:ring-2 focus:ring-[#FACC15] outline-none"
-                required
-                maxLength={24}
-                value={formData.iban}
-                onChange={(e) => setFormData({...formData, iban: e.target.value.toUpperCase()})}
-              />
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <button 
-                type="button"
-                onClick={() => setShowIBANForm(false)}
-                className="flex-1 py-4 bg-gray-50 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                type="submit"
-                disabled={isConnecting}
-                className="flex-[2] py-4 bg-[#141414] text-[#FACC15] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
-              >
-                {isConnecting ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
-                {isConnecting ? 'Verifying...' : 'Verify & Link'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {!isPro && (
-          <p className="mt-6 text-xs text-gray-400">
-            Professional features require both a linked bank and a Pro subscription.
-          </p>
-        )}
-      </div>
-    );
-  }
-
+export default function Financials({ isPro, onUpgrade }: FinancialsProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'payouts'>('overview');
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -187,16 +44,6 @@ export default function Financials({ isPro, onUpgrade, isBankLinked, onBankLinke
           <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">Financials</h1>
           <p className="text-sm font-mono text-gray-500 uppercase tracking-widest mt-1 italic">Enterprise Banking & Cashflow</p>
         </div>
-        {!bankConnected && (
-          <button 
-            onClick={handleConnectBank}
-            disabled={isConnecting}
-            className="px-6 py-3 bg-[#FACC15] text-[#141414] rounded-2xl font-bold flex items-center gap-2 hover:bg-[#EAB308] transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isConnecting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-            {isConnecting ? 'Initializing Link...' : 'Connect Bank'}
-          </button>
-        )}
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -283,64 +130,29 @@ export default function Financials({ isPro, onUpgrade, isBankLinked, onBankLinke
               Bank Connection
             </h3>
             
-            <AnimatePresence mode="wait">
-              {!bankConnected ? (
-                <motion.div 
-                  key="disconnected"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-6"
-                >
-                  <p className="text-xs text-gray-500 leading-relaxed italic">
-                    Connect your bank account via KnZ Financial Link to enable automatic trade settlement and real-time cashflow auditing.
-                  </p>
-                  <div className="p-4 bg-yellow-50 rounded-2xl flex items-start gap-4">
-                    <AlertCircle className="text-yellow-600 mt-1" size={24} />
-                    <p className="text-[10px] text-yellow-800 leading-relaxed font-medium">
-                      Pro users get priority settlement (T+0). Connect your primary business account for optimal sync.
-                    </p>
-                  </div>
-                  <button 
-                    onClick={handleConnectBank}
-                    disabled={isConnecting}
-                    className="w-full py-4 bg-[#141414] text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl active:scale-95 disabled:opacity-50"
-                  >
-                    {isConnecting ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} className="text-[#FACC15]" />}
-                    {isConnecting ? 'Connecting...' : 'Secure Connection'}
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="connected"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-6"
-                >
-                  <div className="flex items-center gap-4 p-6 bg-green-50 rounded-[1.5rem] border border-green-100">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                      <Building2 className="text-green-600" size={24} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-[#141414] text-sm">Linked Business Account</h4>
-                      <p className="text-[10px] text-green-600 font-mono font-bold uppercase tracking-widest">Verified via KnZ Link</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                      <span>SYNC STATUS</span>
-                      <span className="text-[#141414] font-bold">100% SECURE</span>
-                    </div>
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-green-500 h-full w-[100%]"></div>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-gray-400 leading-relaxed text-center">
-                    Last sync: Just now. Next sync scheduled for 06:00 AM UTC.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 p-6 bg-green-50 rounded-[1.5rem] border border-green-100">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                  <Building2 className="text-green-600" size={24} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[#141414] text-sm">Linked Business Account</h4>
+                  <p className="text-[10px] text-green-600 font-mono font-bold uppercase tracking-widest">Verified via KnZ Link</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between text-[10px] font-mono text-gray-400">
+                  <span>SYNC STATUS</span>
+                  <span className="text-[#141414] font-bold">100% SECURE</span>
+                </div>
+                <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-green-500 h-full w-[100%]"></div>
+                </div>
+              </div>
+              <p className="text-[10px] text-gray-400 leading-relaxed text-center">
+                Last sync: Just now. Next sync scheduled for 06:00 AM UTC.
+              </p>
+            </div>
           </div>
 
           <div className="bg-[#141414] p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">

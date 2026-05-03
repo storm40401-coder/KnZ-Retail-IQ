@@ -299,23 +299,23 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
                               </div>
                             </div>
                           </>
-                        ) : (
+                         ) : (
                           <div className="space-y-4 bg-white p-4 rounded-2xl border border-gray-100">
                              <div className="flex items-center gap-3 mb-2">
                                <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
                                  <Building2 className="text-green-600" size={16} />
                                </div>
                                <div>
-                                 <p className="text-[10px] font-bold text-[#141414]">1LINK Bank Transfer</p>
-                                 <p className="text-[8px] text-gray-400 uppercase tracking-widest">Verify & Activate</p>
+                                 <p className="text-[10px] font-bold text-[#141414]">Any Bank Account / Wallet</p>
+                                 <p className="text-[8px] text-gray-400 uppercase tracking-widest">EasyPaisa, JazzCash or 1LINK</p>
                                </div>
                              </div>
                              <p className="text-[10px] text-gray-500 leading-relaxed italic">
-                               Please enter your account title or transaction ID if you have already transferred the amount to the KnZ Business account.
+                               Transfer PKR {activePlan.price} to KnZ official account and enter the transaction ID or account title here for instant verification.
                              </p>
                              <input 
                                required
-                               placeholder="Transaction Hash or Account Title"
+                               placeholder="Transaction ID / Account Title"
                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:ring-2 focus:ring-[#FACC15] outline-none"
                              />
                           </div>

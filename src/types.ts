@@ -26,7 +26,6 @@ export interface UserUsage {
     aiOptimizations: number;
     marketReports: number;
     forecasts: number;
-    bankConnected: boolean;
 }
 
 export const PLAN_LIMITS = {
@@ -36,7 +35,6 @@ export const PLAN_LIMITS = {
         forecasts: 0,
         multiStore: false,
         financials: false,
-        requiresBank: true,
     },
     pro: {
         aiOptimizations: 500,
@@ -44,7 +42,6 @@ export const PLAN_LIMITS = {
         forecasts: 50,
         multiStore: true,
         financials: true,
-        requiresBank: true,
     }
 };
 
