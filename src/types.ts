@@ -26,22 +26,25 @@ export interface UserUsage {
     aiOptimizations: number;
     marketReports: number;
     forecasts: number;
+    bankConnected: boolean;
 }
 
 export const PLAN_LIMITS = {
     free: {
-        aiOptimizations: Infinity,
+        aiOptimizations: 5,
         marketReports: 0,
         forecasts: 0,
         multiStore: false,
         financials: false,
+        requiresBank: true,
     },
     pro: {
-        aiOptimizations: Infinity,
+        aiOptimizations: 500,
         marketReports: 50,
         forecasts: 50,
         multiStore: true,
         financials: true,
+        requiresBank: true,
     }
 };
 

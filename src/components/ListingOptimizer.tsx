@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Sparkles, ArrowRight, Copy, Check, Loader2, Wand2, X } from 'lucide-react';
-import { Product } from '../types';
+import { Product, PLAN_LIMITS } from '../types';
 import { optimizeListing } from '../lib/gemini';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface ListingOptimizerProps {
   product: Product | null;
   onClose: () => void;
+  usage: { aiOptimizations: number };
+  isPro: boolean;
+  isVIP: boolean;
 }
 
-export default function ListingOptimizer({ product, onClose }: ListingOptimizerProps) {
+export default function ListingOptimizer({ product, onClose, usage, isPro, isVIP }: ListingOptimizerProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
     optimizedTitle: string;
@@ -71,6 +74,18 @@ export default function ListingOptimizer({ product, onClose }: ListingOptimizerP
             <h3 className="text-xs font-mono text-gray-400 uppercase italic font-bold mb-6 tracking-widest">Original Data</h3>
             
             <div className="space-y-6">
+              <div>
+                <label className="text-[10px] font-mono text-gray-400 uppercase italic">Monthly Usage</label>
+                <div className="mt-2 text-sm font-bold font-mono">
+                  {usage.aiOptimizations} / {isVIP ? '∞' : (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)}
+                </div>
+                <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-blue-600 transition-all duration-500"
+                    style={{ width: isVIP ? '100%' : `${Math.min(100, (usage.aiOptimizations / (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)) * 100)}%` }}
+                  />
+                </div>
+              </div>
               <div>
                 <label className="text-[10px] font-mono text-gray-400 uppercase italic">Product Name</label>
                 <p className="text-sm font-semibold mt-1">{product.name}</p>

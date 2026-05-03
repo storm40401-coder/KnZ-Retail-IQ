@@ -43,8 +43,15 @@ export default function App() {
   const [usage, setUsage] = useState<UserUsage>({
     aiOptimizations: 0,
     marketReports: 0,
-    forecasts: 0
+    forecasts: 0,
+    bankConnected: false
   });
+
+  const isBankLinked = usage.bankConnected;
+
+  const handleBankLinked = () => {
+    setUsage(prev => ({ ...prev, bankConnected: true }));
+  };
 
   const owners = useMemo(() => [
     'storm40401@gmail.com', 
@@ -90,8 +97,12 @@ export default function App() {
   }, [products]);
 
   const handleOptimize = (product: Product) => {
+    const limits = isPro ? PLAN_LIMITS.pro : PLAN_LIMITS.free;
+    if (!isVIP && usage.aiOptimizations >= limits.aiOptimizations) {
+      setIsSubscriptionModalOpen(true);
+      return;
+    }
     setOptimizingProduct(product);
-    // Track usage for analytics even if unlimited
     setUsage(prev => ({ ...prev, aiOptimizations: prev.aiOptimizations + 1 }));
   };
 
@@ -252,17 +263,41 @@ export default function App() {
         </header>
 
         <AnimatePresence mode="wait">
-          {currentView === 'dashboard' && (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.2 }}
+          {!isBankLinked && currentView !== 'financials' ? (
+             <motion.div 
+              key="bank-gate"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="h-full flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto"
             >
-              <Dashboard products={products} stats={stats} />
+              <div className="w-24 h-24 bg-[#141414] text-[#FACC15] rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl animate-pulse">
+                <Lock size={40} />
+              </div>
+              <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">Verification Required</h1>
+              <p className="text-gray-500 mt-4 leading-relaxed">
+                To access KnZ Smart Inventory tools and AI optimization, you must verify your business identity by linking a verified bank account via Stripe.
+              </p>
+              <button 
+                onClick={() => setCurrentView('financials')}
+                className="mt-12 px-10 py-4 bg-[#141414] text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-xl flex items-center gap-2"
+              >
+                Go to Financials
+              </button>
             </motion.div>
-          )}
+          ) : (
+            <>
+              {currentView === 'dashboard' && (
+                <motion.div
+                  key="dashboard"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Dashboard products={products} stats={stats} />
+                </motion.div>
+              )}
 
           {currentView === 'inventory' && (
             <motion.div
@@ -316,13 +351,13 @@ export default function App() {
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-[#141414] opacity-40">Monthly Usage</span>
                       <span className="text-xs font-bold font-mono text-[#141414]">
-                        {usage.aiOptimizations} / ∞
+                        {usage.aiOptimizations} / {isVIP ? '∞' : (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)}
                       </span>
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-green-500 transition-all duration-1000 ease-out" 
-                        style={{ width: '100%' }}
+                        className="h-full bg-[#141414] transition-all duration-1000 ease-out" 
+                        style={{ width: isVIP ? '100%' : `${Math.min(100, (usage.aiOptimizations / (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)) * 100)}%` }}
                       ></div>
                     </div>
                  </div>
@@ -353,13 +388,18 @@ export default function App() {
               />
             </motion.div>
           )}
-        </AnimatePresence>
+        </>
+      )}
+    </AnimatePresence>
       </main>
 
       {optimizingProduct && (
         <ListingOptimizer 
           product={optimizingProduct} 
           onClose={() => setOptimizingProduct(null)} 
+          usage={usage}
+          isPro={isPro}
+          isVIP={isVIP}
         />
       )}
 

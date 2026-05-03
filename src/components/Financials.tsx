@@ -27,6 +27,8 @@ interface Transaction {
 interface FinancialsProps {
   isPro: boolean;
   onUpgrade: () => void;
+  isBankLinked: boolean;
+  onBankLinked: () => void;
 }
 
 const MOCK_TRANSACTIONS: Transaction[] = [
@@ -35,48 +37,145 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '3', type: 'expense', amount: 2000, description: 'KnZ Pro Subscription', category: 'Software', date: '2026-04-28' },
 ];
 
-export default function Financials({ isPro, onUpgrade }: FinancialsProps) {
+export default function Financials({ isPro, onUpgrade, isBankLinked, onBankLinked }: FinancialsProps) {
   const [isConnecting, setIsConnecting] = useState(false);
-  const [bankConnected, setBankConnected] = useState(false);
+  const [showIBANForm, setShowIBANForm] = useState(false);
+  const [formData, setFormData] = useState({
+    bankName: 'Meezan Bank',
+    iban: '',
+    accountTitle: ''
+  });
 
-  const handleConnectBank = () => {
+  const handleConnectBank = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsConnecting(true);
-    // Simulate Plaid/Stripe Link
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/verify-local-bank', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        onBankLinked();
+      } else {
+        alert(data.error || "Verification failed");
+      }
+    } catch (error) {
+      console.error("Link Error:", error);
+    } finally {
       setIsConnecting(false);
-      setBankConnected(true);
-    }, 3000);
+    }
   };
 
-  if (!isPro) {
+  const bankConnected = isBankLinked;
+
+  if (!bankConnected) {
     return (
       <div className="p-8 lg:p-12 min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
         <div className="w-20 h-20 bg-[#FACC15] text-[#141414] rounded-3xl flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(250,204,21,0.3)]">
-          <Lock size={32} />
+          <Building2 size={32} />
         </div>
         <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">Financial Intelligence</h1>
         <p className="text-gray-500 mt-4 max-w-md leading-relaxed">
-          Connect your bank account to automate payouts, track real-time profitability, and access enterprise funding.
+          Link your Pakistani Business Bank Account to automate payouts and unlock all KnZ Smart Inventory tools.
         </p>
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-          {[
-            { icon: Building2, title: "Bank Sync", desc: "Connect local & international banks" },
-            { icon: Wallet, title: "Profit Tracking", desc: "Calculate margins automatically" },
-            { icon: ShieldCheck, title: "Tax Ready", desc: "Export reports for tax season" }
-          ].map((feature, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <feature.icon size={24} className="text-[#FACC15] mb-3" />
-              <h4 className="font-bold text-sm text-[#141414]">{feature.title}</h4>
-              <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">{feature.desc}</p>
+
+        {!showIBANForm ? (
+          <>
+            <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+              {[
+                { icon: ShieldCheck, title: "SBP Regulated", desc: "SECURE LOCAL BANK INTEGRATION" },
+                { icon: Wallet, title: "Profit Tracking", desc: "CALCULATE MARGINS IN PKR" },
+                { icon: CreditCard, title: "Instant Payouts", desc: "DIRECT TO 1LINK ACCOUNTS" }
+              ].map((feature, i) => (
+                <div key={i} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                  <feature.icon size={24} className="text-[#FACC15] mb-3" />
+                  <h4 className="font-bold text-sm text-[#141414]">{feature.title}</h4>
+                  <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">{feature.desc}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <button 
-          onClick={onUpgrade}
-          className="mt-12 px-10 py-4 bg-[#141414] text-white rounded-2xl font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
-        >
-          Upgrade to Pro
-        </button>
+            <button 
+              onClick={() => setShowIBANForm(true)}
+              className="mt-12 px-10 py-4 bg-[#141414] text-white rounded-2xl font-bold hover:scale-105 transition-transform shadow-xl flex items-center gap-2"
+            >
+              <CreditCard size={18} />
+              Setup Local Bank Account
+            </button>
+          </>
+        ) : (
+          <form onSubmit={handleConnectBank} className="mt-10 w-full max-w-md bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-xl text-left space-y-6">
+            <h3 className="font-bold text-lg text-[#141414] mb-4">Account Details</h3>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Bank Name</label>
+              <select 
+                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#FACC15] outline-none"
+                value={formData.bankName}
+                onChange={(e) => setFormData({...formData, bankName: e.target.value})}
+              >
+                <option>HBL</option>
+                <option>Meezan Bank</option>
+                <option>Bank Alfalah</option>
+                <option>UBL</option>
+                <option>SadaBiz / SadaPay</option>
+                <option>NayaPay</option>
+                <option>Standard Chartered</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Account Title</label>
+              <input 
+                type="text"
+                placeholder="Full Name as per CNIC/Bank"
+                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#FACC15] outline-none"
+                required
+                value={formData.accountTitle}
+                onChange={(e) => setFormData({...formData, accountTitle: e.target.value})}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">IBAN (24 Characters)</label>
+              <input 
+                type="text"
+                placeholder="PK00XXXX0000000000000000"
+                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-medium font-mono focus:ring-2 focus:ring-[#FACC15] outline-none"
+                required
+                maxLength={24}
+                value={formData.iban}
+                onChange={(e) => setFormData({...formData, iban: e.target.value.toUpperCase()})}
+              />
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button 
+                type="button"
+                onClick={() => setShowIBANForm(false)}
+                className="flex-1 py-4 bg-gray-50 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                disabled={isConnecting}
+                className="flex-[2] py-4 bg-[#141414] text-[#FACC15] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+              >
+                {isConnecting ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
+                {isConnecting ? 'Verifying...' : 'Verify & Link'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {!isPro && (
+          <p className="mt-6 text-xs text-gray-400">
+            Professional features require both a linked bank and a Pro subscription.
+          </p>
+        )}
       </div>
     );
   }
@@ -223,8 +322,8 @@ export default function Financials({ isPro, onUpgrade }: FinancialsProps) {
                       <Building2 className="text-green-600" size={24} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-[#141414] text-sm">HBL Business Account</h4>
-                      <p className="text-[10px] text-green-600 font-mono font-bold uppercase tracking-widest">Active & Verified</p>
+                      <h4 className="font-bold text-[#141414] text-sm">Linked Business Account</h4>
+                      <p className="text-[10px] text-green-600 font-mono font-bold uppercase tracking-widest">Verified via KnZ Link</p>
                     </div>
                   </div>
                   <div className="space-y-3">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, Zap, Shield, Rocket, Globe, CreditCard, Lock, ArrowLeft, Loader2 } from 'lucide-react';
+import { X, Check, Zap, Shield, Rocket, Globe, CreditCard, Lock, ArrowLeft, Loader2, Building2, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SubscriptionModalProps {
@@ -20,6 +20,7 @@ const VIP_EMAILS = [
 
 export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEmail = 'guest@example.com' }: SubscriptionModalProps) {
   const [step, setStep] = useState<'selection' | 'payment' | 'processing'>('selection');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'local'>('card');
   const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
   const isVIP = VIP_EMAILS.includes(userEmail);
 
@@ -38,7 +39,7 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
       price: '2000',
       period: 'month',
       description: 'The professional standard',
-      features: ['Unlimited AI Listings', 'Advanced SEO Insights', 'Competitor Analysis', 'API Access'],
+      features: ['AI Optimizer (500/mo)', 'Market Insights', 'Competitor Analysis', 'Pulse Forecasts'],
       popular: true
     },
     {
@@ -63,13 +64,31 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
     }
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStep('processing');
-    // Simulated payment verification
-    setTimeout(() => {
-      onSubscribe(selectedPlan);
-    }, 2500);
+    
+    try {
+      const response = await fetch('/api/verify-subscription-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          method: paymentMethod,
+          amount: activePlan.price
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        onSubscribe(selectedPlan);
+      } else {
+        alert(data.error || "Payment failed");
+        setStep('payment');
+      }
+    } catch (error) {
+      alert("System error. Try again later.");
+      setStep('payment');
+    }
   };
 
   return (
@@ -110,7 +129,7 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
                   <ul className="space-y-3">
                     {[
                       { icon: Globe, text: "Multi-store sync", sub: "HBL, Stripe & POS" },
-                      { icon: Zap, text: "Unlimited AI optimizations", sub: "Priority Gemini processing" },
+                      { icon: Zap, text: isVIP ? "Unlimited AI optimizations" : "500 AI optimizations", sub: "Enterprise listing audits" },
                       { icon: TrendingUp, text: "Market Intelligence", sub: "Trend spy & analysis" },
                       { icon: CreditCard, text: "Bank Connectivity", sub: "PKR 1.5M credit limit" },
                       { icon: Shield, text: "Pulse Forecasting", sub: "Predictive stock buffers" }
@@ -221,50 +240,92 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
                       </button>
                       
                       <h3 className="text-xl font-sans font-bold text-[#141414] mb-2">Secure Checkout</h3>
+                      <div className="flex gap-2 mb-6">
+                        <button 
+                          onClick={() => setPaymentMethod('card')}
+                          className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                            paymentMethod === 'card' ? 'bg-white border-2 border-[#FACC15] text-[#141414] shadow-md' : 'bg-gray-50 border-2 border-transparent text-gray-400'
+                          }`}
+                        >
+                          Card / Global
+                        </button>
+                        <button 
+                          onClick={() => setPaymentMethod('local')}
+                          className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                            paymentMethod === 'local' ? 'bg-white border-2 border-[#FACC15] text-[#141414] shadow-md' : 'bg-gray-50 border-2 border-transparent text-gray-400'
+                          }`}
+                        >
+                          Local Bank / PK
+                        </button>
+                      </div>
                       <p className="text-xs text-gray-500 mb-6 italic">Paying PKR {activePlan.price} for {activePlan.name} access.</p>
 
                       <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">Card Details</label>
-                          <div className="relative">
-                            <input 
-                              required
-                              placeholder="0000 0000 0000 0000"
-                              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
-                            />
-                            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">Expiry</label>
-                            <input 
-                              required
-                              placeholder="MM/YY"
-                              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">CVV</label>
-                            <div className="relative">
-                              <input 
-                                required
-                                type="password"
-                                maxLength={3}
-                                placeholder="***"
-                                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
-                              />
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        {paymentMethod === 'card' ? (
+                          <>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">Card Details</label>
+                              <div className="relative">
+                                <input 
+                                  required
+                                  placeholder="0000 0000 0000 0000"
+                                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
+                                />
+                                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                              </div>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">Expiry</label>
+                                <input 
+                                  required
+                                  placeholder="MM/YY"
+                                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-[10px] font-mono uppercase text-gray-400 font-bold tracking-widest">CVV</label>
+                                <div className="relative">
+                                  <input 
+                                    required
+                                    type="password"
+                                    maxLength={3}
+                                    placeholder="***"
+                                    className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FACC15] outline-none transition-all placeholder:text-gray-300"
+                                  />
+                                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="space-y-4 bg-white p-4 rounded-2xl border border-gray-100">
+                             <div className="flex items-center gap-3 mb-2">
+                               <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                                 <Building2 className="text-green-600" size={16} />
+                               </div>
+                               <div>
+                                 <p className="text-[10px] font-bold text-[#141414]">1LINK Bank Transfer</p>
+                                 <p className="text-[8px] text-gray-400 uppercase tracking-widest">Verify & Activate</p>
+                               </div>
+                             </div>
+                             <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                               Please enter your account title or transaction ID if you have already transferred the amount to the KnZ Business account.
+                             </p>
+                             <input 
+                               required
+                               placeholder="Transaction Hash or Account Title"
+                               className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs focus:ring-2 focus:ring-[#FACC15] outline-none"
+                             />
                           </div>
-                        </div>
+                        )}
 
                         <button
                           type="submit"
                           className="w-full mt-6 py-4 bg-[#141414] text-[#FACC15] rounded-2xl font-bold hover:bg-black transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                          <Lock size={16} /> Pay & Activate
+                          <Lock size={16} /> {paymentMethod === 'card' ? 'Pay & Activate' : 'Verify & Activate'}
                         </button>
                       </form>
                     </motion.div>
