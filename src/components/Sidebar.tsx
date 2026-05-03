@@ -7,6 +7,9 @@ import {
   LogOut,
   ChevronRight,
   Store,
+  Wallet,
+  TrendingUp,
+  Lock,
   X
 } from 'lucide-react';
 import { View } from '../types';
@@ -27,7 +30,9 @@ export default function Sidebar({ isOpen, onClose, currentView, onViewChange, on
   const items = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory' as const, label: 'Inventory', icon: Package },
-    { id: 'optimizer' as const, label: 'AI Optimizer', icon: Sparkles },
+    { id: 'financials' as const, label: 'Financials', icon: Wallet, pro: true },
+    { id: 'market-insights' as const, label: 'Market Insights', icon: TrendingUp, pro: true },
+    { id: 'optimizer' as const, label: 'AI Optimizer', icon: Sparkles, pro: true },
   ];
 
   return (
@@ -74,7 +79,12 @@ export default function Sidebar({ isOpen, onClose, currentView, onViewChange, on
               <item.icon size={20} className={cn(
                 currentView === item.id ? "text-[#FACC15]" : "text-gray-500 group-hover:text-gray-300"
               )} />
-              <span className="font-sans font-medium text-sm">{item.label}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-sans font-medium text-sm">{item.label}</span>
+                {item.pro && !isPro && (
+                  <Lock size={10} className="text-gray-600" />
+                )}
+              </div>
             </div>
             {currentView === item.id && (
               <ChevronRight size={14} className="text-white animate-pulse" />
@@ -84,33 +94,38 @@ export default function Sidebar({ isOpen, onClose, currentView, onViewChange, on
       </nav>
 
       <div className="p-4 border-t border-white/5">
-        {isVIP && (
-          <div className={cn(
-            "p-4 rounded-3xl mb-4 transition-all",
-            isPro 
-              ? "bg-[#FACC15] text-[#141414] shadow-[0_0_20px_rgba(250,204,21,0.2)]" 
-              : "bg-white/5 text-white"
-          )}>
-            <div className="flex items-center justify-between mb-2">
-               <p className={cn(
-                 "text-[10px] font-mono uppercase tracking-widest italic",
-                 isPro ? "text-[#141414] font-bold" : "text-gray-500"
-               )}>
-                 {isPro ? 'Pro Active' : 'Pro Version'}
-               </p>
-               {isPro && <Sparkles size={12} className="text-[#141414]" />}
-            </div>
-            <p className={cn(
-              "text-xs font-sans",
-              isPro ? "text-[#141414]/80 font-medium" : "text-gray-300"
-            )}>
-              {isPro 
-                ? 'All enterprise features are now unlocked for your store.' 
-                : 'Unlock multi-store sync and advanced SEO audits.'}
-            </p>
-            {/* Upgrade/Manage button hidden for now as per user request */}
+        <div className={cn(
+          "p-4 rounded-3xl mb-4 transition-all",
+          isPro 
+            ? "bg-[#FACC15] text-[#141414] shadow-[0_0_20px_rgba(250,204,21,0.2)]" 
+            : "bg-white/5 text-white"
+        )}>
+          <div className="flex items-center justify-between mb-2">
+             <p className={cn(
+               "text-[10px] font-mono uppercase tracking-widest italic",
+               isPro ? "text-[#141414] font-bold" : "text-gray-500"
+             )}>
+               {isPro ? 'Pro Active' : 'Pro Version'}
+             </p>
+             {isPro && <Sparkles size={12} className="text-[#141414]" />}
           </div>
-        )}
+          <p className={cn(
+            "text-xs font-sans",
+            isPro ? "text-[#141414]/80 font-medium" : "text-gray-300"
+          )}>
+            {isPro 
+              ? 'All enterprise features are now unlocked for your store.' 
+              : 'Unlock financials, multi-store sync and advanced SEO audits.'}
+          </p>
+          {!isPro && (
+            <button 
+              onClick={onUpgrade}
+              className="w-full mt-4 py-2 bg-white/10 hover:bg-white/20 transition-colors rounded-xl text-[10px] font-bold uppercase tracking-widest text-white border border-white/10"
+            >
+              Upgrade Now
+            </button>
+          )}
+        </div>
         
         <button 
           onClick={onSignOut}

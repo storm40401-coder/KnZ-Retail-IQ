@@ -107,17 +107,22 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
                     Take your business to the next level with our advanced intelligence tools.
                   </p>
 
-                  <ul className="space-y-4">
+                  <ul className="space-y-3">
                     {[
-                      { icon: Globe, text: "Multi-store synchronization" },
-                      { icon: Zap, text: "Unlimited AI optimizations" },
-                      { icon: Shield, text: "Enterprise-grade safety stock" }
+                      { icon: Globe, text: "Multi-store sync", sub: "HBL, Stripe & POS" },
+                      { icon: Zap, text: "Unlimited AI optimizations", sub: "Priority Gemini processing" },
+                      { icon: TrendingUp, text: "Market Intelligence", sub: "Trend spy & analysis" },
+                      { icon: CreditCard, text: "Bank Connectivity", sub: "PKR 1.5M credit limit" },
+                      { icon: Shield, text: "Pulse Forecasting", sub: "Predictive stock buffers" }
                     ].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm text-gray-300">
-                        <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
-                          <item.icon size={12} className="text-[#FACC15]" />
+                      <li key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
+                        <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                          <item.icon size={16} className="text-[#FACC15]" />
                         </div>
-                        {item.text}
+                        <div>
+                          <p className="text-sm font-bold text-white leading-none mb-1">{item.text}</p>
+                          <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest leading-none">{item.sub}</p>
+                        </div>
                       </li>
                     ))}
                   </ul>

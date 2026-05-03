@@ -15,8 +15,10 @@ import InventoryGrid from './components/InventoryGrid';
 import ListingOptimizer from './components/ListingOptimizer';
 import ProductModal from './components/ProductModal';
 import SubscriptionModal from './components/SubscriptionModal';
+import Financials from './components/Financials';
+import MarketInsights from './components/MarketInsights';
 import Auth from './components/Auth';
-import { Product, View, InventoryStats } from './types';
+import { Product, View, InventoryStats, PLAN_LIMITS, UserUsage } from './types';
 import { AnimatePresence, motion } from 'motion/react';
 import { Sparkles, Menu, X, Lock, Loader2 } from 'lucide-react';
 import { auth, onAuthStateChanged, firebaseSignOut } from './lib/firebase';
@@ -38,6 +40,11 @@ export default function App() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [usage, setUsage] = useState<UserUsage>({
+    aiOptimizations: 0,
+    marketReports: 0,
+    forecasts: 0
+  });
 
   const owners = useMemo(() => [
     'storm40401@gmail.com', 
@@ -84,6 +91,8 @@ export default function App() {
 
   const handleOptimize = (product: Product) => {
     setOptimizingProduct(product);
+    // Track usage for analytics even if unlimited
+    setUsage(prev => ({ ...prev, aiOptimizations: prev.aiOptimizations + 1 }));
   };
 
   const handleEdit = (product: Product) => {
@@ -217,7 +226,7 @@ export default function App() {
           closeSidebar();
         }} 
         onUpgrade={() => {
-          if (isVIP) setIsSubscriptionModalOpen(true);
+          setIsSubscriptionModalOpen(true);
           closeSidebar();
         }}
         onSignOut={handleSignOut}
@@ -268,7 +277,21 @@ export default function App() {
                 onOptimize={handleOptimize}
                 onEdit={handleEdit}
                 onAdd={handleAdd}
+                isPro={isPro}
+                onUpgrade={() => setIsSubscriptionModalOpen(true)}
               />
+            </motion.div>
+          )}
+
+          {currentView === 'financials' && (
+            <motion.div
+              key="financials"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Financials isPro={isPro} onUpgrade={() => setIsSubscriptionModalOpen(true)} />
             </motion.div>
           )}
 
@@ -277,21 +300,57 @@ export default function App() {
               key="optimizer-landing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="p-12 h-screen flex flex-col items-center justify-center text-center"
+              className="p-12 h-screen flex flex-col items-center justify-center text-center max-w-4xl mx-auto"
             >
-              <div className="w-24 h-24 bg-[#141414] rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl">
+              <div className="w-24 h-24 bg-[#141414] rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl relative">
                 <Sparkles size={40} className="text-[#FACC15]" />
+                <div className="absolute -top-2 -right-2 bg-[#FACC15] text-[#141414] text-[10px] font-black px-2 py-1 rounded-lg shadow-sm">AI</div>
               </div>
-              <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">KnZ Listing Assistant</h1>
-              <p className="text-gray-500 mt-4 max-w-md">
-                Select a product from your inventory to generate professional, SEO-optimized marketing copy.
+              <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">KnZ Listing Intelligence</h1>
+              <p className="text-gray-500 mt-4 max-w-md leading-relaxed">
+                Select a product from your inventory to optimize its market positioning using KnZ's pulse-aware Gemini model.
               </p>
-              <button 
-                onClick={() => setCurrentView('inventory')}
-                className="mt-8 px-8 py-3 bg-[#141414] text-white rounded-2xl font-bold hover:scale-105 transition-transform"
-              >
-                Browse Inventory
-              </button>
+              
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                 <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm text-left flex flex-col justify-center">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#141414] opacity-40">Monthly Usage</span>
+                      <span className="text-xs font-bold font-mono text-[#141414]">
+                        {usage.aiOptimizations} / ∞
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 transition-all duration-1000 ease-out" 
+                        style={{ width: '100%' }}
+                      ></div>
+                    </div>
+                 </div>
+                 <button 
+                  onClick={() => setCurrentView('inventory')}
+                  className="group px-8 py-4 bg-[#141414] text-white rounded-[2rem] font-bold hover:scale-105 transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95"
+                >
+                  Browse Inventory 
+                  <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {currentView === 'market-insights' && (
+            <motion.div
+              key="market-insights"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MarketInsights 
+                isPro={isPro} 
+                onUpgrade={() => setIsSubscriptionModalOpen(true)} 
+                usage={usage}
+                onUseReport={() => setUsage(prev => ({ ...prev, marketReports: prev.marketReports + 1 }))}
+              />
             </motion.div>
           )}
         </AnimatePresence>

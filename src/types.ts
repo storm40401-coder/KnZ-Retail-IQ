@@ -22,4 +22,27 @@ export interface InventoryStats {
     categoryDistribution: { name: string; value: number }[];
 }
 
-export type View = 'dashboard' | 'inventory' | 'optimizer';
+export interface UserUsage {
+    aiOptimizations: number;
+    marketReports: number;
+    forecasts: number;
+}
+
+export const PLAN_LIMITS = {
+    free: {
+        aiOptimizations: Infinity,
+        marketReports: 0,
+        forecasts: 0,
+        multiStore: false,
+        financials: false,
+    },
+    pro: {
+        aiOptimizations: Infinity,
+        marketReports: 50,
+        forecasts: 50,
+        multiStore: true,
+        financials: true,
+    }
+};
+
+export type View = 'dashboard' | 'inventory' | 'optimizer' | 'financials' | 'market-insights';

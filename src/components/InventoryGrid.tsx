@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Filter, MoreVertical, AlertCircle, Edit2, Sparkles } from 'lucide-react';
+import { Search, Plus, Filter, MoreVertical, AlertCircle, Edit2, Sparkles, Zap, Lock } from 'lucide-react';
 import { Product } from '../types';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -9,9 +9,11 @@ interface InventoryGridProps {
   onOptimize: (product: Product) => void;
   onEdit: (product: Product) => void;
   onAdd: () => void;
+  isPro: boolean;
+  onUpgrade: () => void;
 }
 
-export default function InventoryGrid({ products, onOptimize, onEdit, onAdd }: InventoryGridProps) {
+export default function InventoryGrid({ products, onOptimize, onEdit, onAdd, isPro, onUpgrade }: InventoryGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredProducts = products.filter(p => 
@@ -113,6 +115,23 @@ export default function InventoryGrid({ products, onOptimize, onEdit, onAdd }: I
                           <Sparkles size={18} />
                         </button>
                         <button 
+                          onClick={() => {
+                            if (!isPro) {
+                              onUpgrade();
+                            } else {
+                              // Logic for Pro forecast
+                              alert("Pulse Forecast: This SKU is predicted to see a 20% spike in demand next week based on trending sentiment.");
+                            }
+                          }}
+                          className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            isPro ? "text-purple-600 hover:bg-purple-50" : "text-gray-200"
+                          )}
+                          title="Pulse Forecast"
+                        >
+                          {isPro ? <Zap size={18} /> : <Lock size={14} />}
+                        </button>
+                        <button 
                           onClick={() => onEdit(product)}
                           className="p-2 text-gray-400 hover:text-[#141414] hover:bg-gray-100 rounded-lg transition-colors"
                         >
@@ -173,7 +192,7 @@ export default function InventoryGrid({ products, onOptimize, onEdit, onAdd }: I
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
                 <button 
                   onClick={() => onOptimize(product)}
                   className="flex items-center justify-center gap-2 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs"
@@ -182,11 +201,27 @@ export default function InventoryGrid({ products, onOptimize, onEdit, onAdd }: I
                   Optimize
                 </button>
                 <button 
+                  onClick={() => {
+                    if (!isPro) {
+                      onUpgrade();
+                    } else {
+                      alert("Pulse Forecast: This SKU is predicted to see a 20% spike in demand next week.");
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs",
+                    isPro ? "bg-purple-50 text-purple-600" : "bg-gray-50 text-gray-200"
+                  )}
+                >
+                  {isPro ? <Zap size={14} /> : <Lock size={12} />}
+                  Forecast
+                </button>
+                <button 
                   onClick={() => onEdit(product)}
                   className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-600 rounded-xl font-bold text-xs"
                 >
                   <Edit2 size={14} />
-                  Edit Details
+                  Edit
                 </button>
               </div>
             </motion.div>
