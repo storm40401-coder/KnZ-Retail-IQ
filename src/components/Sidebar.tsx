@@ -7,7 +7,6 @@ import {
   LogOut,
   ChevronRight,
   Store,
-  Wallet,
   TrendingUp,
   Lock,
   X
@@ -30,7 +29,6 @@ export default function Sidebar({ isOpen, onClose, currentView, onViewChange, on
   const items = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory' as const, label: 'Inventory', icon: Package },
-    { id: 'financials' as const, label: 'Financials', icon: Wallet, pro: true },
     { id: 'market-insights' as const, label: 'Market Insights', icon: TrendingUp, pro: true },
     { id: 'optimizer' as const, label: 'AI Optimizer', icon: Sparkles, pro: true },
   ];
@@ -115,7 +113,7 @@ export default function Sidebar({ isOpen, onClose, currentView, onViewChange, on
           )}>
             {isPro 
               ? 'All enterprise features are now unlocked for your store.' 
-              : 'Unlock financials, multi-store sync and advanced SEO audits.'}
+              : 'Unlock market intelligence, multi-store sync and advanced SEO audits.'}
           </p>
           {!isPro && (
             <button 

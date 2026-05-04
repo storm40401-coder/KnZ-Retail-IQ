@@ -34,15 +34,13 @@ export const PLAN_LIMITS = {
         marketReports: 0,
         forecasts: 0,
         multiStore: false,
-        financials: false,
     },
     pro: {
         aiOptimizations: 500,
         marketReports: 50,
         forecasts: 50,
         multiStore: true,
-        financials: true,
     }
 };
 
-export type View = 'dashboard' | 'inventory' | 'optimizer' | 'financials' | 'market-insights';
+export type View = 'dashboard' | 'inventory' | 'optimizer' | 'market-insights';

@@ -15,12 +15,11 @@ import InventoryGrid from './components/InventoryGrid';
 import ListingOptimizer from './components/ListingOptimizer';
 import ProductModal from './components/ProductModal';
 import SubscriptionModal from './components/SubscriptionModal';
-import Financials from './components/Financials';
 import MarketInsights from './components/MarketInsights';
 import Auth from './components/Auth';
 import { Product, View, InventoryStats, PLAN_LIMITS, UserUsage } from './types';
 import { AnimatePresence, motion } from 'motion/react';
-import { Sparkles, Menu, X, Lock, Loader2 } from 'lucide-react';
+import { Sparkles, Menu, X, Lock, Loader2, ChevronRight, Package, ArrowRight } from 'lucide-react';
 import { auth, onAuthStateChanged, firebaseSignOut } from './lib/firebase';
 
 // Mock Initial Data - Starting empty for the user
@@ -287,38 +286,29 @@ export default function App() {
             </motion.div>
           )}
 
-          {currentView === 'financials' && (
-            <motion.div
-              key="financials"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Financials isPro={isPro} onUpgrade={() => setIsSubscriptionModalOpen(true)} />
-            </motion.div>
-          )}
-
           {currentView === 'optimizer' && (
              <motion.div
               key="optimizer-landing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="p-12 h-screen flex flex-col items-center justify-center text-center max-w-4xl mx-auto"
+              className="p-8 md:p-12 min-h-screen flex flex-col max-w-6xl mx-auto"
             >
-              <div className="w-24 h-24 bg-[#141414] rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl relative">
-                <Sparkles size={40} className="text-[#FACC15]" />
-                <div className="absolute -top-2 -right-2 bg-[#FACC15] text-[#141414] text-[10px] font-black px-2 py-1 rounded-lg shadow-sm">AI</div>
-              </div>
-              <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">KnZ Listing Intelligence</h1>
-              <p className="text-gray-500 mt-4 max-w-md leading-relaxed">
-                Select a product from your inventory to optimize its market positioning using KnZ's pulse-aware Gemini model.
-              </p>
-              
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-                 <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm text-left flex flex-col justify-center">
+              <header className="mb-12 text-center">
+                <div className="w-20 h-20 bg-[#141414] rounded-[1.5rem] flex items-center justify-center mb-6 shadow-2xl relative mx-auto">
+                  <Sparkles size={32} className="text-[#FACC15]" />
+                  <div className="absolute -top-2 -right-2 bg-[#FACC15] text-[#141414] text-[8px] font-black px-2 py-1 rounded-lg shadow-sm">GEMINI PRO</div>
+                </div>
+                <h1 className="text-4xl font-sans font-bold tracking-tight text-[#141414]">KnZ Listing Intelligence</h1>
+                <p className="text-gray-500 mt-4 max-w-lg mx-auto leading-relaxed">
+                  Select a product to generate high-conversion copy and SEO-optimized listings using KnZ's proprietary pulse-aware Gemini model.
+                </p>
+              </header>
+
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-1 border-r border-gray-100 pr-8 hidden lg:block">
+                  <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mb-6">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#141414] opacity-40">Monthly Usage</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#141414] opacity-40">Monthly Pool</span>
                       <span className="text-xs font-bold font-mono text-[#141414]">
                         {usage.aiOptimizations} / {isVIP ? '∞' : (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)}
                       </span>
@@ -329,14 +319,53 @@ export default function App() {
                         style={{ width: isVIP ? '100%' : `${Math.min(100, (usage.aiOptimizations / (isPro ? PLAN_LIMITS.pro.aiOptimizations : PLAN_LIMITS.free.aiOptimizations)) * 100)}%` }}
                       ></div>
                     </div>
-                 </div>
-                 <button 
-                  onClick={() => setCurrentView('inventory')}
-                  className="group px-8 py-4 bg-[#141414] text-white rounded-[2rem] font-bold hover:scale-105 transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95"
-                >
-                  Browse Inventory 
-                  <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-2xl">
+                    <p className="text-[10px] text-blue-600 font-medium leading-relaxed italic">
+                      "AI-optimized listings see an average 24% increase in click-through rate across platforms like Amazon & Noon."
+                    </p>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-3 space-y-4">
+                   <div className="flex items-center justify-between mb-2">
+                     <h3 className="font-bold text-lg text-[#141414]">Select Product to Optimize</h3>
+                     <span className="text-[10px] font-mono text-gray-400 uppercase">{products.length} Items Available</span>
+                   </div>
+                   
+                   {products.length === 0 ? (
+                     <div className="bg-white p-20 rounded-[2.5rem] border border-dashed border-gray-200 text-center">
+                        <Package className="mx-auto text-gray-200 mb-4" size={48} />
+                        <p className="text-gray-400 text-sm">No products in inventory. Add items to start optimizing.</p>
+                        <button 
+                          onClick={() => setCurrentView('inventory')}
+                          className="mt-6 text-blue-600 font-bold text-xs hover:underline"
+                        >
+                          Go to Inventory
+                        </button>
+                     </div>
+                   ) : (
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {products.map(p => (
+                          <button 
+                            key={p.id}
+                            onClick={() => handleOptimize(p)}
+                            className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-left hover:border-[#141414] transition-all group relative overflow-hidden"
+                          >
+                             <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <Sparkles size={16} className="text-[#FACC15]" />
+                             </div>
+                             <p className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-1">{p.sku}</p>
+                             <h4 className="font-bold text-[#141414] text-sm truncate">{p.name}</h4>
+                             <p className="text-[10px] text-gray-500 mt-2 line-clamp-2 italic">{p.description || 'No description provided'}</p>
+                             <div className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest">
+                               Optimize Now <ArrowRight size={10} />
+                             </div>
+                          </button>
+                        ))}
+                     </div>
+                   )}
+                </div>
               </div>
             </motion.div>
           )}

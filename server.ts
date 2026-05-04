@@ -13,7 +13,7 @@ async function startServer() {
     try {
       const { plan, method, amount } = req.body;
       
-      // Simulate verification of the local bank transfer or easy-paisa / jazzcash
+      // Pure simulation for business account verification
       console.log(`Verifying subscription payment: ${plan}, Method: ${method}, Amount: ${amount}`);
       
       await new Promise(resolve => setTimeout(resolve, 2500));

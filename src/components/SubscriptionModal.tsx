@@ -128,11 +128,11 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe, userEm
 
                   <ul className="space-y-3">
                     {[
-                      { icon: Globe, text: "Multi-store sync", sub: "HBL, Stripe & POS" },
+                      { icon: Globe, text: "Multi-platform Sync", sub: "Amazon, Noon & Shopify" },
                       { icon: Zap, text: isVIP ? "Unlimited AI optimizations" : "500 AI optimizations", sub: "Enterprise listing audits" },
                       { icon: TrendingUp, text: "Market Intelligence", sub: "Trend spy & analysis" },
-                      { icon: CreditCard, text: "Bank Connectivity", sub: "PKR 1.5M credit limit" },
-                      { icon: Shield, text: "Pulse Forecasting", sub: "Predictive stock buffers" }
+                      { icon: Shield, text: "Pulse Forecasting", sub: "Predictive stock buffers" },
+                      { icon: CreditCard, text: "Priority Support", sub: "Direct helpdesk access" }
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
                         <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
